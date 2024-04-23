@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import config  from "config";
 import log from "./logger";
-
 import Jwt from 'jsonwebtoken';
 
 export const connectDB = async () => {
@@ -10,33 +9,28 @@ export const connectDB = async () => {
   return connection.host;
 }
 
-export const signJwt = (
-    object: Object, 
-    keyName: 'accessTokenPrivateKey' | 'refreshTokenPrivateKey',
-    options?: Jwt.SignOptions | undefined
-  ) => {
-    
+const privateKey = config.get<string>("privateKey");
+const publicKey = config.get<string>("publicKey");
+
+export function signJwt( object: Object, options?: Jwt.SignOptions | undefined ) {
   return Jwt.sign(
     object, 
-    config.get<string>(keyName), 
-    {
-      ...(options && options),
-      algorithm: 'RS256',
-    }
-  );   
+    privateKey, {
+    ...(options && options),
+    algorithm: "RS256",
+  });
 }
   
-export const verifyJwt = ( token: string, keyName: "accessTokenPublicKey" | "refreshTokenPublicKey" ) => {
+export function verifyJwt(token: string) {
   try {
-    const decoded = Jwt.verify(token, config.get(keyName));
- 
+    const decoded = Jwt.verify(token, publicKey);
     return {
       valid: true,
       expired: false,
       decoded,
     };
-
   } catch (e: any) {
+    console.error(e);
     return {
       valid: false,
       expired: e.message === "jwt expired",
@@ -44,3 +38,4 @@ export const verifyJwt = ( token: string, keyName: "accessTokenPublicKey" | "ref
     };
   }
 }
+

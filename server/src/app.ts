@@ -4,10 +4,17 @@ import log from './utils/logger';
 import routes from './routes';
 import deserializeUser from './middleware/deserializeUser';
 import { connectDB } from './utils/helper';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
-const app = express();
 const port = config.get<string>('port');
+const app = express();
 
+app.use(cors({
+  origin: config.get('origin'),
+  credentials: true
+}))
+app.use(cookieParser());
 app.use(express.json());
 app.use(deserializeUser);
 
@@ -16,3 +23,4 @@ app.listen(port, () => {
   connectDB();
   routes(app);
 });
+

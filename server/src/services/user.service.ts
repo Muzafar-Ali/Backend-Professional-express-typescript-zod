@@ -12,7 +12,7 @@ export const createUser = async (input: UserInputType) => {
     const user = await UserModel.create(input);
     if (!user) throw new Error("User not created");
 
-    return user;
+    return omit(user.toJSON(), "password");
      
   } catch (error: any) {
     throw new Error(error.message);

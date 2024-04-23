@@ -26,7 +26,6 @@ const RegisterPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
         credentials: "include",
         mode: "cors",
@@ -37,7 +36,7 @@ const RegisterPage = () => {
         throw new Error('Error creating user')
       }
 
-      router.push('/')
+      router.push('/auth/login')
 
     } catch (error: any) {
       setRegisterError(error.message);

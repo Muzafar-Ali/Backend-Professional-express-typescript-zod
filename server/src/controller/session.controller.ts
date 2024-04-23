@@ -5,7 +5,7 @@ import { CreateSessionInputType } from "../schemaValidation/sesssion.schema";
 import { signJwt } from "../utils/helper";
 import config from "config";
 
-export const createUserSession = async (req: Request<{}, {}, CreateSessionInputType["body"]>, res: Response) => {
+export const createUserSessionHandler = async (req: Request<{}, {}, CreateSessionInputType["body"]>, res: Response) => {
   try {
     
     // validate the user password
@@ -18,23 +18,34 @@ export const createUserSession = async (req: Request<{}, {}, CreateSessionInputT
 
     //create an access token
     const accessToken = signJwt(
-      { 
-        ...user, 
-        session: session._id 
-      }, 
-      'accessTokenPrivateKey', 
-      { expiresIn: config.get("accessTokenLife") } // 15 minutes,
-    )
+      { ...user, session: session._id },
+      { expiresIn: config.get("accessTokenLife") } // 15 minutes
+    );
 
     // create a refresh token
     const refreshToken = signJwt(
-      {
-        ...user,
-        session: session._id
-      },
-      'refreshTokenPrivateKey',
-      { expiresIn: config.get("refreshTokenLife") } // 1 year,
-    )
+      { ...user, session: session._id },
+      { expiresIn: config.get("refreshTokenLife") } // 15 minutes
+    );
+
+    // return access & refresh tokens
+    
+    res.cookie("accessToken", accessToken, {
+      maxAge: config.get('maxAgeAccesToken'), // 15 mins
+      httpOnly: true,
+      domain: config.get('domain'),
+      path: config.get('path'),
+      sameSite: "strict",
+      secure: config.get('secure'),
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: config.get('maxAgeRefreshToken'), // 1 year
+      domain: config.get('domain'),
+      path: config.get('path'),
+      sameSite: "strict",
+      secure: config.get('secure'),
+  });
 
     return res.send({ accessToken, refreshToken })
   
