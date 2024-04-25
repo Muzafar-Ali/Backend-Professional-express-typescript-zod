@@ -19,7 +19,7 @@ export const updateSession = async (query: any, update: any) => {
 
 export const reIssueAccessToken = async ({ refreshToken }: { refreshToken: string }) => {
   
-  const { decoded } = verifyJwt(refreshToken, "refreshTokenPublicKey");
+  const { decoded } = verifyJwt(refreshToken);
   if (!decoded || !get(decoded, "session")) return false;
 
   const session = await SessionModel.findById(get(decoded, "session"));
@@ -33,7 +33,6 @@ export const reIssueAccessToken = async ({ refreshToken }: { refreshToken: strin
     { ...user, 
       session: session._id 
     }, 
-    "accessTokenPrivateKey", 
     { expiresIn: config.get("accessTokenLife") } // 15 minutes
   );
   

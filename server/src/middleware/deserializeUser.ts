@@ -7,10 +7,8 @@ import config from "config";
 const deserializeUser = async (req: Request, res:Response, next: NextFunction) => {
   
  const accessToken = get(req, "cookies.accessToken") || get(req, "headers.authorization", "").replace(/^Bearer\s/, "");
-console.log('accessToken', {accessToken});
 
  const refreshToken = get(req, "cookies.refreshToken") || get(req, "headers.x-refresh");
- console.log('refreshToken', {refreshToken});
 
  if (!accessToken) return next();
 
