@@ -32,7 +32,7 @@ export default function Home() {
       )}
       
       { !currentUser && (
-        <div className="flex flex-col gap-2 items-center justify-center">
+        <div className="flex flex-col gap-2 items-center justify-center px-10 py-20 rounded-lg shadow">
           <Link href={"/auth/login"}>
             <h1 className="border rounded-md px-2 py-2 cursor-pointer bg-pink-700 text-white text-center w-[200px]">
               Login with Email
@@ -50,7 +50,7 @@ export default function Home() {
                 height={25}
               />
             </Link>
-          <h2 >You don&apos;t have an account? <Link href={"/auht/register"} className="text-pink-600 bg-gray-50 text-center font-semibold text-lg border px-2 py-2 rounded-md"> sign up</Link></h2>
+          <h2 >You don&apos;t have an account? <Link href={"/auth/register"} className="text-pink-600 bg-gray-50 text-center font-semibold text-lg border px-2 py-2 rounded-md"> sign up</Link></h2>
         </div>
       )} 
     </div>
