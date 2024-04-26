@@ -17,17 +17,18 @@ export const databaseResponseTimeHistogram = new client.Histogram({
 });
 
 export function startMetricsServer() {
+
   const collectDefaultMetrics = client.collectDefaultMetrics;
 
-  collectDefaultMetrics();
+  collectDefaultMetrics({ register: client.register });
 
   app.get("/metrics", async (req, res) => {
-    res.set("Content-Type", client.register.contentType);
+    res.setHeader("Content-Type", client.register.contentType);
 
     return res.send(await client.register.metrics());
   });
 
-  app.listen(9100, () => {
-    log.info("Metrics server started at http://localhost:9100");
+  app.listen(9091, () => {
+    log.info("Metrics server started at http://localhost:9090");
   });
 }
