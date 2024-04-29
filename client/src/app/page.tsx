@@ -24,11 +24,31 @@ export default function Home() {
     getUser();
 
   },[])
+
+  const logoutHandler = async () => {
+    const logout = await fetch("http://localhost:1337/api/v1/sessions",{
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      mode: "cors",
+      credentials: "include",
+    })
+
+    if(logout.ok) {
+      setCurrentUser(undefined)
+    }
+  }
   
   return (
     <div className="flex min-h-screen flex-col items-center justify-between p-24">
       { currentUser && (
-          <h1>Welcome {currentUser?.name} </h1>
+        <div className="flex items-center justify-between gap-5 w-full">
+          <h1 className="border rounded-md px-2 py-2 cursor-pointer mb-5 bg-gray-100 text-black text-start w-full">Welcome {currentUser?.name} </h1>
+          <button
+            className="border rounded-md px-2 py-2 cursor-pointer mb-5 bg-pink-700 text-white text-center w-[100px]" 
+            onClick={logoutHandler}>Logout</button>
+        </div>
       )}
       
       { !currentUser && (

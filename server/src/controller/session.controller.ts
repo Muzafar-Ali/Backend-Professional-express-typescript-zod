@@ -1,4 +1,4 @@
-import { CookieOptions, Request, Response } from "express";
+import { Request, Response } from "express";
 import {
   createSession,
   findSessions,
@@ -11,25 +11,13 @@ import {
   validatePassword,
 } from "../services/user.service";
 import { CreateSessionInputType } from "../schemaValidation/sesssion.schema";
-import { signJwt } from "../utils/helper";
+import { accessTokenCookieOptions, refreshTokenCookieOptions, signJwt } from "../utils/helper";
 import { GoogleOauthTokensType, GoogleUserType} from "../utils/types";
 import config from "config";
 import jwt from "jsonwebtoken";
 
 
-const accessTokenCookieOptions: CookieOptions= {
-  maxAge: config.get("maxAgeAccessToken"), // 15 mins
-  httpOnly: true,
-  domain: config.get("domain"),
-  path: config.get("path"),
-  sameSite: "lax",
-  secure: config.get("secure"),
-};
 
-const refreshTokenCookieOptions: CookieOptions = {
-  ...accessTokenCookieOptions,
-  maxAge: config.get("maxAgeRefreshToken"), // 1 year
-};
 
 export const createUserSessionHandler = async (
   req: Request<{}, {}, CreateSessionInputType["body"]>,
@@ -75,13 +63,29 @@ export const getUserSession = async (req: Request, res: Response) => {
 };
 
 export const deleteSessionHandler = async (req: Request, res: Response) => {
-  const sessionId = res.locals.user.session;
-  await updateSession({ _id: sessionId }, { valid: false });
-
-  return res.send({
-    accessToken: null,
-    refreshToken: null,
-  });
+ 
+  try {
+    const sessionId = res.locals.user.session;
+    console.log('Session id :', sessionId);
+    
+ 
+    const sesssionDeleted = await updateSession({ _id: sessionId }, { valid: false });
+    console.log('sesssionDeleted', sesssionDeleted);
+    
+    if (!sesssionDeleted.acknowledged) return res.status(404).send("Session not found");
+  
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+  
+    return res.send({
+      accessToken: null,
+      refreshToken: null,
+    });
+    
+  } catch (error) {
+    console.log('Delete session error :',error);
+    return res.status(500).send("An error occurred while deleting the session")
+  }
 };
 
 export const googleOauthHandler = async (req: Request, res: Response) => {
@@ -90,8 +94,7 @@ export const googleOauthHandler = async (req: Request, res: Response) => {
 
     if (typeof code === "string") {
       // get id token and access token from google
-      const { id_token, access_token }: GoogleOauthTokensType =
-        await getGoogleOauthTokens({ code });
+      const { id_token, access_token }: GoogleOauthTokensType = await getGoogleOauthTokens({ code });
 
       // get user from token
       // const user = jwt.decode(id_token);
@@ -119,8 +122,7 @@ export const googleOauthHandler = async (req: Request, res: Response) => {
         }
       );
 
-      if (!user)
-        return res.status(404).send("User not found or could not be created");
+      if (!user) return res.status(404).send("User not found or could not be created");
 
       // create session
       const session = await createSession(
@@ -148,7 +150,7 @@ export const googleOauthHandler = async (req: Request, res: Response) => {
       res.redirect(config.get("origin"));
     }
   } catch (error) {
-    console.log(error);
+    console.log('googleOauthHandler error:',error);
     return res.redirect(`${config.get("origin")}/oauth/error`);
   }
 };

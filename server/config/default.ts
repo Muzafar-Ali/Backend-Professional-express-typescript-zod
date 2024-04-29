@@ -3,7 +3,7 @@ dotenv.config();
 
 export default {
   port: 1337,
-  origin: "http://localhost:3000",
+  origin: "http://localhost:3001",
   domain: "localhost",
   path: "/",
   secure: process.env.NODE_ENV === "development" ? false : true,

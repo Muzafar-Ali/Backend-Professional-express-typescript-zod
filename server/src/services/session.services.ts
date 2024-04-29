@@ -10,12 +10,13 @@ export const createSession = async (user: string, userAgent: string) => {
 }
 
 export const findSessions = async (query: any) => {
-  return SessionModel.find(query).lean()
-}
-
-export const updateSession = async (query: any, update: any) => {
-  return SessionModel.updateOne(query, update)
-}
+  return await SessionModel.find(query).lean();
+ }
+ 
+ export const updateSession = async (query: any, update: any) => {
+  return await SessionModel.updateOne(query, update);
+ }
+ 
 
 export const reIssueAccessToken = async ({ refreshToken }: { refreshToken: string }) => {
   
@@ -41,5 +42,5 @@ export const reIssueAccessToken = async ({ refreshToken }: { refreshToken: strin
 }
 
 export const deleteSession = async (query: any) => {
-  return SessionModel.deleteOne(query)
+  return await SessionModel.deleteOne(query)
 }

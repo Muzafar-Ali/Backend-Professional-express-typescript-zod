@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { get } from "lodash";
-import { verifyJwt } from "../utils/helper";
+import { accessTokenCookieOptions, verifyJwt } from "../utils/helper";
 import { reIssueAccessToken } from "../services/session.services";
-import config from "config";
+import { get } from "lodash";
 
 const deserializeUser = async (req: Request, res:Response, next: NextFunction) => {
   
@@ -25,14 +24,7 @@ const deserializeUser = async (req: Request, res:Response, next: NextFunction) =
     if (newAccessToken) {
       res.setHeader("x-access-token", newAccessToken);
 
-      res.cookie("accessToken", newAccessToken, {
-        maxAge: config.get('maxAgeAccesToken'), // 15 mins
-        httpOnly: true,
-        domain: config.get('domain'),
-        path: config.get('path'),
-        sameSite: "strict",
-        secure: config.get('secure'),
-      });
+      res.cookie("accessToken", newAccessToken, accessTokenCookieOptions);
     }
 
     const result = verifyJwt(newAccessToken as string);
