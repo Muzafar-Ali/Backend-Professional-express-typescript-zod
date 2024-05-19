@@ -1,23 +1,25 @@
 import { AnyZodObject } from "zod";
 import { Request, Response, NextFunction } from "express";
 
-
-function validateSchema(schema: AnyZodObject){
-    
-  return function(req: Request, res: Response, next: NextFunction){
+function validateSchema(schema: AnyZodObject) {
+  return function (req: Request, res: Response, next: NextFunction) {
     try {
-      schema.parse({
+      const validatedData = schema.parse({
         body: req.body,
         query: req.query,
-        params: req.params
-      })
-      next()
+        params: req.params,
+      });
+
+      req.body = validatedData.body;
+      req.query = validatedData.query;
+      req.params = validatedData.params;
+
+      next();
     } catch (error: any) {
-      const message = error.errors.map((item: any) => item.message)
-      return res.status(400).send(message)
+      const messages = error.errors.map((item: any) => item.message);
+      return res.status(400).json({ errors: messages });
     }
-  }
-    
+  };
 }
 
 export default validateSchema;
